@@ -1,0 +1,113 @@
+#include <iostream>
+
+struct Node {
+    int row;
+    int col;
+    int value;
+    Node* next;
+
+    Node(int r, int c, int v) : row(r), col(c), value(v), next(nullptr) {}
+};
+
+class SparseMatrix {
+private:
+    Node** rows; 
+    int numRows, numCols;
+
+public:
+    SparseMatrix(int rows, int cols) : numRows(rows), numCols(cols) {
+        this->rows = new Node*[numRows];
+        for (int i = 0; i < numRows; ++i) {
+            this->rows[i] = nullptr;
+        }
+    }
+
+    void setValue(int row, int col, int value) {
+        if (row < 0 || row >= numRows || col < 0 || col >= numCols) {
+            std::cerr << "Invalid row or column index." << std::endl;
+            return;
+        }
+        if(value==0) return;
+
+        Node* current = this->rows[row];
+        Node* prev = nullptr;
+
+        while (current != nullptr && current->col < col) {
+            prev = current;
+            current = current->next;
+        }
+
+        if (current != nullptr && current->col == col) {
+            current->value = value;
+        } else {
+            Node* newNode = new Node(row, col, value);
+            newNode->next = current;
+
+            if (prev == nullptr) {
+                this->rows[row] = newNode;
+            } else {
+                prev->next = newNode;
+            }
+        }
+    }
+
+    void printMatrix() const {
+        for (int i = 0; i < numRows; ++i) {
+            Node* current = this->rows[i];
+            for (int j = 0; j < numCols; ++j) {
+                if (current != nullptr && current->col == j) {
+                    std::cout << current->row << " "<< current->col << " "<< current->value << " ";
+                current = current->next;
+                
+                std::cout << std::endl;
+                }
+            }
+        }
+    }
+    
+    void printSparseMatrix() const {
+        for (int i = 0; i < numRows; ++i) {
+            Node* current = this->rows[i];
+            for (int j = 0; j < numCols; ++j) {
+                if (current != nullptr && current->col == j) {
+                    std::cout << current->value << " ";
+                    current = current->next;
+                } else {
+                    std::cout << "0 ";
+                }
+            }
+            std::cout << std::endl;
+        }
+    }
+};
+
+int main() {
+    int numRows, numCols;
+
+    std::cout << "Enter the number of rows: ";
+    std::cin >> numRows;
+
+    std::cout << "Enter the number of columns: ";
+    std::cin >> numCols;
+    SparseMatrix sparse(numRows,numCols);
+
+    // Input for the normal matrix
+    int matrix[numRows][numCols];
+    std::cout << "Enter the matrix elements:" << std::endl;
+
+    for (int i = 0; i < numRows; ++i) {
+        for (int j = 0; j < numCols; ++j) {
+            std::cin >> matrix[i][j];
+            sparse.setValue(i, j, matrix[i][j]);
+        }
+    }
+
+    std::cout << "LinkedList Representation:" << std::endl;
+    sparse.printMatrix();
+    std::cout << "Sparse Matrix:" << std::endl;
+    sparse.printSparseMatrix();
+
+    return 0;
+}
+
+
